@@ -1,0 +1,13 @@
+zoho_custom_campaign.settings:
+  title: "Zoho Custom Campaign"
+  description: "Configure Zoho Custom Campaign integration settings."
+  parent: system.admin_config_services
+  route_name: zoho_custom_campaign.data_page
+  weight: 10
+
+zoho_custom_campaign.contacts:
+  title: "Zoho Contacts"
+  description: "View all contacts from Zoho Campaigns."
+  parent: system.admin_config_services
+  route_name: zoho_custom_campaign.contacts_list
+  weight: 11

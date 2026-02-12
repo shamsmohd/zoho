@@ -3,4 +3,4 @@ type: module
 description: "Integrates Zoho Campaigns with Drupal."
 package: Custom
 core_version_requirement: ^10 || ^11
-configure: zoho_campaign.settings
+configure: zoho_custom_campaign.settings

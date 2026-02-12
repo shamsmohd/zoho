@@ -13,3 +13,11 @@ zoho_custom_campaign.oauthredirect:
     _title: "Zoho Custom Campaign Data"
   requirements:
     _permission: "access content"
+
+zoho_custom_campaign.contacts_list:
+  path: "/admin/config/services/zoho-custom-campaign/contacts"
+  defaults:
+    _controller: '\Drupal\zoho_custom_campaign\Controller\ContactsController::listContacts'
+    _title: "Zoho Contacts"
+  requirements:
+    _permission: "administer site configuration"

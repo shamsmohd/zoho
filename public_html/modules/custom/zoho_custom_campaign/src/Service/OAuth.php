@@ -9,11 +9,29 @@ use GuzzleHttp\Exception\RequestException;
 
 use Drupal\Core\State\StateInterface;
 
+/**
+ * OAuth service for Zoho Campaigns integration.
+ */
 class OAuth
 {
+    /**
+     * @var \GuzzleHttp\ClientInterface
+     */
     protected $httpClient;
+    
+    /**
+     * @var \Drupal\Core\Config\ImmutableConfig
+     */
     protected $config;
+    
+    /**
+     * @var \Drupal\Core\Logger\LoggerChannelInterface
+     */
     protected $logger;
+    
+    /**
+     * @var \Drupal\Core\State\StateInterface
+     */
     protected $state;
 
     protected $access_token;
@@ -78,14 +96,24 @@ class OAuth
 
             if (isset($data['access_token'])) {
                 $this->saveTokens($data);
+                $this->logger->info('Successfully obtained access token from Zoho');
                 return $data;
             }
 
-            $this->logger->error('OAuth token exchange error: ' . json_encode($data));
+            $this->logger->error('OAuth token exchange error - No access_token in response: @data', [
+                '@data' => json_encode($data)
+            ]);
             return FALSE;
 
         } catch (RequestException $e) {
-            $this->logger->error('OAuth token exchange failed: @message', ['@message' => $e->getMessage()]);
+            $errorBody = '';
+            if ($e->hasResponse()) {
+                $errorBody = $e->getResponse()->getBody()->getContents();
+            }
+            $this->logger->error('OAuth token exchange failed: @message | Response: @body', [
+                '@message' => $e->getMessage(),
+                '@body' => $errorBody,
+            ]);
             return FALSE;
         }
     }
@@ -102,6 +130,9 @@ class OAuth
         if (isset($data['expires_in'])) {
             $this->state->set('zoho_custom_campaign.expires', \Drupal::time()->getRequestTime() + $data['expires_in']);
         }
+        if (isset($data['api_domain'])) {
+            $this->state->set('zoho_custom_campaign.api_domain', $data['api_domain']);
+        }
     }
 
     /**
@@ -110,5 +141,85 @@ class OAuth
     public function isConnected()
     {
         return !empty($this->state->get('zoho_custom_campaign.access_token'));
+    }
+
+    /**
+     * Get the current access token, refreshing if necessary.
+     */
+    public function getAccessToken()
+    {
+        if ($this->isTokenExpired()) {
+            $this->refreshAccessToken();
+        }
+        return $this->state->get('zoho_custom_campaign.access_token');
+    }
+
+    /**
+     * Check if the access token has expired.
+     */
+    protected function isTokenExpired()
+    {
+        $expires = $this->state->get('zoho_custom_campaign.expires');
+        if (!$expires) {
+            return true;
+        }
+        // Add 60 second buffer to refresh before actual expiration
+        return \Drupal::time()->getRequestTime() >= ($expires - 60);
+    }
+
+    /**
+     * Refresh the access token using the refresh token.
+     */
+    public function refreshAccessToken()
+    {
+        $refreshToken = $this->state->get('zoho_custom_campaign.refresh_token');
+        if (!$refreshToken) {
+            $this->logger->error('No refresh token available');
+            return FALSE;
+        }
+
+        $tokenUrl = 'https://accounts.zoho.com/oauth/v2/token';
+        try {
+            $response = $this->httpClient->post($tokenUrl, [
+                'form_params' => [
+                    'grant_type' => 'refresh_token',
+                    'client_id' => $this->config->get('client_id'),
+                    'client_secret' => $this->config->get('client_secret'),
+                    'refresh_token' => $refreshToken,
+                ],
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            if (isset($data['access_token'])) {
+                $this->saveTokens($data);
+                $this->logger->info('Successfully refreshed access token');
+                return $data;
+            }
+
+            $this->logger->error('Token refresh error - No access_token in response: @data', [
+                '@data' => json_encode($data)
+            ]);
+            return FALSE;
+
+        } catch (RequestException $e) {
+            $errorBody = '';
+            if ($e->hasResponse()) {
+                $errorBody = $e->getResponse()->getBody()->getContents();
+            }
+            $this->logger->error('Token refresh failed: @message | Response: @body', [
+                '@message' => $e->getMessage(),
+                '@body' => $errorBody,
+            ]);
+            return FALSE;
+        }
+    }
+
+    /**
+     * Get the API domain for making API calls.
+     */
+    public function getApiDomain()
+    {
+        return $this->state->get('zoho_custom_campaign.api_domain') ?: 'https://www.zohoapis.com';
     }
 }
