@@ -1,0 +1,126 @@
+# ===============================
+# Drupal-specific ignored files
+# ===============================
+# Drupal sensitive and local config files
+public_html/sites/*/local.settings.inc
+public_html/sites/*/settings.local.php
+public_html/sites/*/development.services.yml
+public_html/INSTALL.txt
+public_html/README.md
+public_html/example.gitignore
+public_html/autoload.php
+public_html/index.php
+public_html/robots.txt
+public_html/update.php
+public_html/web.config
+public_html/.csslintrc
+public_html/.editorconfig
+public_html/.eslintignore
+public_html/.eslintrc.json
+public_html/.gitattributes
+public_html/.htaccess
+public_html/.ht.router.php
+public_html/update.php
+public_html/web.config
+
+# Ignore public and private file directories
+public_html/sites/*/files
+public_html/sites/*/private
+
+# Allow only default_images inside files
+!public_html/sites/*/files/default_images
+
+# Ignore core and contrib components managed by Composer
+public_html/core/
+public_html/modules/contrib/
+public_html/profiles/
+public_html/themes/contrib/
+vendor/
+node_modules/
+
+# Libraries not committed to the repo
+public_html/libraries/
+
+# ===============================
+# IDE and editor metadata
+# ===============================
+# PHPStorm / WebStorm / IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+nbproject/
+
+# Eclipse
+.project
+.pydevproject
+.settings/
+.buildpath
+
+# Vim / Gedit
+*.swp
+*.*~
+.vim/
+.viminfo
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ===============================
+# OS and environment junk files
+# ===============================
+# macOS
+.DS_Store
+
+# Linux
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ===============================
+# Shell and server environment files
+# ===============================
+.bash_history
+.bashrc
+.bash_profile
+.bash_logout
+.zshrc
+.zsh_history
+
+# CPanel / Hosting server
+.contactemail
+.cpanel/
+.cphorde/
+.dns
+.lastlogin
+.errors_log
+errors.log
+logs/
+tmp/
+access-logs/
+cpbackup-exclude.conf
+etc/
+ssl/
+www/
+
+# ===============================
+# Drupal tools and backups
+# ===============================
+.drush/
+drush-backups/
+.editorconfig
+.gitattributes
+
+# ===============================
+# Custom scripts or binaries
+# ===============================
+bin/

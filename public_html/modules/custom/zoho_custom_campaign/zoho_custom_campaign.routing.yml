@@ -1,0 +1,15 @@
+zoho_custom_campaign.data_page:
+  path: "/admin/config/services/zoho-custom-campaign/data"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\ZohoCustomCampaignForm'
+    _title: "Zoho Custom Campaign Settings"
+  requirements:
+    _permission: "access content"
+
+zoho_custom_campaign.oauthredirect:
+  path: "/admin/config/services/zoho-custom-campaign/oauthredirect"
+  defaults:
+    _controller: '\Drupal\zoho_custom_campaign\Controller\OAuthController::oauthredirect'
+    _title: "Zoho Custom Campaign Data"
+  requirements:
+    _permission: "access content"

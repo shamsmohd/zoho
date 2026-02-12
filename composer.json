@@ -1,0 +1,274 @@
+{
+  "name": "sprintive/seeds-project",
+  "description": "Kickoff distro for SME's, Curated by Sprintive.",
+  "type": "project",
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.1",
+    "oomphinc/composer-installers-extender": "^1||^2",
+    "composer/installers": "1.10",
+    "webflo/drupal-finder": "^1.2",
+    "sprintive/seeds": "^12.0.0",
+    "drupal/coder": "8.*",
+    "symfony/css-selector": "~4",
+    "composer/composer": "^2",
+    "drush/drush": "^12.4.3",
+    "kenwheeler/slick": "1.6.0",
+    "gdsmith/easing": "1.4.1",
+    "dinbror/blazy": "1.8.2",
+    "dimsemenov/photoswipe": "4.1.3",
+    "ckeditor-plugin/fakeobjects": "4.14.0",
+    "ckeditor-plugin/iframe": "4.14.0",
+    "drupal/zohomail": "^1.1",
+    "drupal/md_slider": "^1.5",
+    "drupal/jquery_colorpicker": "dev-3495776-d11_ready"  },
+  "patchLevel": {
+    "drupal/core": "-p2"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8",
+      "canonical": false,
+      "exclude": [
+        "drupal/fast_404",  
+        "drupal/ckeditor_iframe"
+      ]
+    },
+    {
+      "type": "vcs",
+      "url": "https://git.drupalcode.org/issue/jquery_colorpicker-3495776.git"
+    },
+    {
+      "type": "git",
+      "url": "https://git.drupalcode.org/issue/fast_404-3287465.git"
+    },
+    {
+      "type": "git",
+      "url": "https://git.drupalcode.org/issue/ckeditor_iframe-3286496.git"
+    },
+    {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "kenwheeler/slick",
+        "version": "1.6.0",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://github.com/kenwheeler/slick/archive/1.6.0.zip",
+          "type": "zip"
+        },
+        "require": {
+          "composer/installers": "~1.0"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "gdsmith/easing",
+        "version": "1.4.1",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://github.com/gdsmith/jquery.easing/archive/1.4.1.zip",
+          "type": "zip"
+        },
+        "require": {
+          "composer/installers": "~1.0"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "dinbror/blazy",
+        "version": "1.8.2",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://github.com/dinbror/blazy/archive/1.8.2.zip",
+          "type": "zip"
+        },
+        "require": {
+          "composer/installers": "~1.0"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "dimsemenov/photoswipe",
+        "version": "4.1.3",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.3.zip",
+          "type": "zip"
+        },
+        "require": {
+          "composer/installers": "~1.0"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "ckeditor-plugin/fakeobjects",
+        "version": "4.14.0",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://download.ckeditor.com/fakeobjects/releases/fakeobjects_4.14.0.zip",
+          "type": "zip"
+        },
+        "require": {
+          "composer/installers": "~1.0"
+        }
+      }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "ckeditor-plugin/iframe",
+        "version": "4.14.0",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://download.ckeditor.com/iframe/releases/iframe_4.14.0.zip",
+          "type": "zip"
+        },
+        "require": {
+          "composer/installers": "~1.0"
+        }
+      }
+    }
+  ],
+  "config": {
+    "bin-dir": "bin/",
+    "secure-http": false,
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "composer/installers": true,
+      "cweagans/composer-patches": true,
+      "oomphinc/composer-installers-extender": true,
+      "drupal/console-extend-plugin": true,
+      "drupal/core-composer-scaffold": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "autoload": {
+    "classmap": [
+      "scripts/composer/ScriptHandler.php"
+    ]
+  },
+  "scripts": {
+    "drupal-scaffold": "@composer drupal:scaffold",
+    "init-translations-yml": "Seeds\\composer\\ScriptHandler::moveTranslationsYmlFile",
+    "post-install-cmd": [
+      "@composer drupal-scaffold",
+      "@composer init-translations-yml",
+      "Seeds\\composer\\ScriptHandler::removeGitDirectories"
+    ],
+    "post-update-cmd": [
+      "@composer drupal-scaffold",
+      "@composer init-translations-yml",
+      "Seeds\\composer\\ScriptHandler::removeGitDirectories"
+    ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-8.x-7.x": "8.7.x-dev"
+    },
+    "installer-types": [
+      "npm-asset"
+    ],
+    "installer-paths": {
+      "public_html/core": [
+        "type:drupal-core"
+      ],
+      "public_html/libraries/{$name}": [
+        "type:drupal-library",
+        "type:bower-asset",
+        "type:npm-asset"
+      ],
+      "public_html/libraries/ace": [
+        "npm-asset/ace-builds"
+      ],
+      "public_html/modules/contrib/{$name}": [
+        "type:drupal-module"
+      ],
+      "public_html/profiles/contrib/{$name}": [
+        "type:drupal-profile"
+      ],
+      "public_html/themes/contrib/{$name}": [
+        "type:drupal-theme"
+      ],
+      "drush/contrib/{$name}": [
+        "type:drupal-drush"
+      ]
+    },
+    "enable-patching": true,
+    "composer-exit-on-patch-failure": false,
+    "drupal-scaffold": {
+      "locations": {
+        "web-root": "./public_html"
+      },
+      "file-mapping": {
+        "[web-root]/sites/default/default.settings.php": "assets/default.settings.php",
+        "[web-root]/sites/default/development.services.yml": {
+          "mode": "replace",
+          "path": "assets/development.services.yml",
+          "overwrite": false
+        },
+        "[web-root]/sites/default/settings.fast404.php": {
+          "mode": "replace",
+          "path": "assets/settings.fast404.php",
+          "overwrite": false
+        },
+        "[web-root]/themes/404/404.html": {
+          "mode": "replace",
+          "path": "assets/404/404.html",
+          "overwrite": false
+        },
+        "[web-root]/themes/404/404-ar.html": {
+          "mode": "replace",
+          "path": "assets/404/404-ar.html",
+          "overwrite": false
+        },
+        "[web-root]/themes/404/style.css": {
+          "mode": "replace",
+          "path": "assets/404/style.css",
+          "overwrite": false
+        },
+        "[web-root]/themes/404/style-rtl.css": {
+          "mode": "replace",
+          "path": "assets/404/style-rtl.css",
+          "overwrite": false
+        },
+        "drush/drush.yml": {
+          "mode": "replace",
+          "path": "assets/drush.yml",
+          "overwrite": false
+        }
+      }
+    }
+  },
+  "authors": [
+    {
+      "name": "Sprintive",
+      "homepage": "http://sprintive.com",
+      "role": "Supporting Organization"
+    },
+    {
+      "name": "Mohammad Abdul-Qader",
+      "homepage": "https://www.drupal.org/u/mabdulqader",
+      "role": "Maintainer"
+    }
+  ],
+  "support": {
+    "issues": "http://drupal.org/project/issues/seeds",
+    "source": "http://cgit.drupalcode.org/seeds",
+    "email": "info@sprintive.com"
+  }
+}
