@@ -21,3 +21,59 @@ zoho_custom_campaign.contacts_list:
     _title: "Zoho Contacts"
   requirements:
     _permission: "administer site configuration"
+
+zoho_custom_campaign.add_contact:
+  path: "/admin/config/services/zoho-custom-campaign/add-contact"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\AddContactForm'
+    _title: "Add Contact"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.contact_details:
+  path: "/admin/config/services/zoho-custom-campaign/contact/{list_key}/{email}"
+  defaults:
+    _controller: '\Drupal\zoho_custom_campaign\Controller\ContactDetailsController::viewContact'
+    _title: "Contact Details"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.edit_contact:
+  path: "/admin/config/services/zoho-custom-campaign/contact/{list_key}/{email}/edit"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\EditContactForm'
+    _title: "Edit Contact"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.delete_contact:
+  path: "/admin/config/services/zoho-custom-campaign/contact/{list_key}/{email}/delete"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\DeleteContactForm'
+    _title: "Delete Contact"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.campaigns_list:
+  path: "/admin/config/services/zoho-custom-campaign/campaigns"
+  defaults:
+    _controller: '\Drupal\zoho_custom_campaign\Controller\CampaignsController::listCampaigns'
+    _title: "Campaigns"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.create_campaign:
+  path: "/admin/config/services/zoho-custom-campaign/create-campaign"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\CreateCampaignForm'
+    _title: "Create Campaign"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.send_campaign:
+  path: "/admin/config/services/zoho-custom-campaign/campaign/{campaign_key}/send"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\SendCampaignForm'
+    _title: "Send Campaign"
+  requirements:
+    _permission: "administer site configuration"

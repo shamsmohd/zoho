@@ -18,17 +18,17 @@ class OAuth
      * @var \GuzzleHttp\ClientInterface
      */
     protected $httpClient;
-    
+
     /**
      * @var \Drupal\Core\Config\ImmutableConfig
      */
     protected $config;
-    
+
     /**
      * @var \Drupal\Core\Logger\LoggerChannelInterface
      */
     protected $logger;
-    
+
     /**
      * @var \Drupal\Core\State\StateInterface
      */
@@ -57,7 +57,7 @@ class OAuth
     {
         $clientId = $this->config->get('client_id');
         $redirectUri = $this->config->get('redirect_uri');
-        $scope = 'ZohoCampaigns.contact.UPDATE,ZohoCampaigns.contact.READ'; // Add other scopes as needed
+        $scope = 'ZohoCampaigns.contact.UPDATE,ZohoCampaigns.contact.READ,ZohoCampaigns.campaign.ALL'; // Contact and Campaign scopes
 
         if (!$clientId || !$redirectUri) {
             return '';
@@ -104,7 +104,6 @@ class OAuth
                 '@data' => json_encode($data)
             ]);
             return FALSE;
-
         } catch (RequestException $e) {
             $errorBody = '';
             if ($e->hasResponse()) {
@@ -201,7 +200,6 @@ class OAuth
                 '@data' => json_encode($data)
             ]);
             return FALSE;
-
         } catch (RequestException $e) {
             $errorBody = '';
             if ($e->hasResponse()) {

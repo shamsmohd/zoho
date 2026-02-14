@@ -75,24 +75,36 @@ class ContactsController extends ControllerBase
         $header = [
             $this->t('Email'),
             $this->t('Contact Name'),
+            $this->t('Phone Number'),
             $this->t('List Name'),
-            $this->t('Status'),
+            $this->t('Actions'),
         ];
 
         $rows = [];
         foreach ($contacts as $contact) {
-            $email = $contact['Contact Email'] ?? $contact['email'] ?? 'N/A';
+            $email = $contact['Contact Email'] ?? $contact['contact_email'] ?? 'N/A';
             $firstName = $contact['First Name'] ?? $contact['firstname'] ?? '';
             $lastName = $contact['Last Name'] ?? $contact['lastname'] ?? '';
             $contactName = trim($firstName . ' ' . $lastName) ?: 'N/A';
             $listName = $contact['list_name'] ?? 'N/A';
-            $status = $contact['Contact Status'] ?? $contact['status'] ?? 'N/A';
+            $phone = $contact['Phone'] ?? $contact['phone'] ?? 'N/A';
+            // $status = $contact['Contact Status'] ?? $contact['status'] ?? 'N/A';
+
+            $detailsLink = \Drupal\Core\Link::createFromRoute(
+                $this->t('Details'),
+                'zoho_custom_campaign.contact_details',
+                [
+                    'list_key' => $contact['list_key'],
+                    'email' => $email,
+                ]
+            );
 
             $rows[] = [
                 $email,
                 $contactName,
+                $phone,
                 $listName,
-                $status,
+                $detailsLink,
             ];
         }
 

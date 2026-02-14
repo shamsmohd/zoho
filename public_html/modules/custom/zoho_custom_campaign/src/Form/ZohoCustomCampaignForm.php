@@ -86,40 +86,51 @@ class ZohoCustomCampaignForm extends ConfigFormBase
         ];
 
         // Authorization Link
-        if ($config->get('client_id') && !$connected) {
+        if ($config->get('client_id')) {
             $authUrl = $this->oauth->getAuthorizationUrl();
             if ($authUrl) {
-                $form['connect'] = [
-                    '#type' => 'link',
-                    '#title' => $this->t('Connect to Zoho'),
-                    '#url' => \Drupal\Core\Url::fromUri($authUrl),
-                    '#attributes' => ['class' => ['button', 'button--primary']],
-                ];
-                
+                if (!$connected) {
+                    $form['connect'] = [
+                        '#type' => 'link',
+                        '#title' => $this->t('Connect to Zoho'),
+                        '#url' => \Drupal\Core\Url::fromUri($authUrl),
+                        '#attributes' => ['class' => ['button', 'button--primary']],
+                    ];
+                } else {
+                    // Show re-authorize button when already connected
+                    $form['reconnect'] = [
+                        '#type' => 'link',
+                        '#title' => $this->t('Re-authorize with Zoho'),
+                        '#url' => \Drupal\Core\Url::fromUri($authUrl),
+                        '#attributes' => ['class' => ['button', 'button--primary']],
+                        '#prefix' => '<p>' . $this->t('To enable campaign features, click below to re-authorize with updated permissions.') . '</p>',
+                    ];
+                }
+
                 // Debug information
                 $form['debug_info'] = [
                     '#type' => 'details',
                     '#title' => $this->t('Debug Information'),
                     '#open' => FALSE,
                 ];
-                
+
                 $form['debug_info']['auth_url'] = [
                     '#type' => 'item',
                     '#title' => $this->t('Authorization URL'),
                     '#markup' => '<code style="word-break: break-all;">' . htmlspecialchars($authUrl) . '</code>',
                 ];
-                
+
                 $form['debug_info']['redirect_uri_check'] = [
                     '#type' => 'item',
                     '#title' => $this->t('Configured Redirect URI'),
-                    '#markup' => '<code>' . htmlspecialchars($config->get('redirect_uri')) . '</code><br><small>' . 
+                    '#markup' => '<code>' . htmlspecialchars($config->get('redirect_uri')) . '</code><br><small>' .
                         $this->t('Make sure this EXACTLY matches the Authorized Redirect URI in your Zoho Developer Console.') . '</small>',
                 ];
-                
+
                 $form['debug_info']['expected_callback'] = [
                     '#type' => 'item',
                     '#title' => $this->t('Expected Callback URL'),
-                    '#markup' => '<code>' . htmlspecialchars($config->get('redirect_uri')) . '?code=XXXXX</code><br><small>' . 
+                    '#markup' => '<code>' . htmlspecialchars($config->get('redirect_uri')) . '?code=XXXXX</code><br><small>' .
                         $this->t('After authorization, Zoho should redirect to this URL with a code parameter.') . '</small>',
                 ];
             }

@@ -11,3 +11,10 @@ zoho_custom_campaign.contacts:
   parent: system.admin_config_services
   route_name: zoho_custom_campaign.contacts_list
   weight: 11
+
+zoho_custom_campaign.campaigns:
+  title: "Campaigns"
+  description: "Manage email campaigns"
+  parent: system.admin_config_services
+  route_name: zoho_custom_campaign.campaigns_list
+  weight: 12

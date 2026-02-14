@@ -1,0 +1,11 @@
+zoho_custom_campaign.add_contact_action:
+  route_name: zoho_custom_campaign.add_contact
+  title: "Add contact"
+  appears_on:
+    - zoho_custom_campaign.contacts_list
+
+zoho_custom_campaign.create_campaign_action:
+  route_name: zoho_custom_campaign.create_campaign
+  title: "Create campaign"
+  appears_on:
+    - zoho_custom_campaign.campaigns_list
