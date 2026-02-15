@@ -319,8 +319,8 @@ class ApiService
 
             // Extract campaigns from response
             $campaigns = [];
-            if (isset($data['list_of_details'])) {
-                foreach ($data['list_of_details'] as $campaign) {
+            if (isset($data['recent_campaigns'])) {
+                foreach ($data['recent_campaigns'] as $campaign) {
                     $campaigns[] = $campaign;
                 }
             }
