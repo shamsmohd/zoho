@@ -150,6 +150,25 @@ class ApiService
      * @return array
      *   Array of contacts with list information.
      */
+    public function getSpecificContact()
+    {
+        $data = $this->makeApiRequest('contact/allfields', []);
+
+        if ($data && isset($data['list_of_details'])) {
+            $this->logger->error(print_r($data, true));
+            return $data['list_of_details'];
+        }
+
+        return FALSE;
+    }
+
+
+    /**
+     * Get all contacts from all mailing lists.
+     *
+     * @return array
+     *   Array of contacts with list information.
+     */
     public function getAllContacts()
     {
         $allContacts = [];

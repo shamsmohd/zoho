@@ -35,7 +35,7 @@ class ContactDetailsController extends ControllerBase
         $email = urldecode($email);
 
         // Get all contacts and find the specific one
-        $allContacts = $this->apiService->getAllContacts();
+        $allContacts = $this->apiService->getSpecificContact();
 
         $contact = null;
         foreach ($allContacts as $c) {

@@ -10,7 +10,7 @@ use Drupal\zoho_custom_campaign\Service\OAuth;
 /**
  * Controller for displaying Zoho Campaigns contacts.
  */
-class ContactsController extends ControllerBase
+class AccountsController extends ControllerBase
 {
     /**
      * @var \Drupal\zoho_custom_campaign\Service\ApiService
@@ -37,11 +37,11 @@ class ContactsController extends ControllerBase
     }
 
     /**
-     * Display all contacts from Zoho Campaigns.
+     * Display all accounts from Zoho Campaigns.
      */
-    public function listContacts()
+    public function listAccounts()
     {
-        \Drupal::logger('zoho_custom_campaign')->notice('Zoho callback reached.');
+        \Drupal::logger('zoho_custom_crm')->notice('Zoho callback reached.');
 
         // Check if connected to Zoho
         if (!$this->oauth->isConnected()) {
@@ -55,7 +55,7 @@ class ContactsController extends ControllerBase
         }
 
         // Fetch all contacts
-        $contacts = $this->apiService->getAllContacts();
+        $contacts = $this->apiService->getAllAccounts();
 
         if ($contacts === false) {
             \Drupal::messenger()->addError($this->t('Failed to fetch contacts from Zoho Campaigns. Check the logs for details.'));
