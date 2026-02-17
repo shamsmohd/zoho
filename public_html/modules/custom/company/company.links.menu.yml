@@ -1,0 +1,11 @@
+entity.company.settings:
+  title: 'Company'
+  description: 'Configure a Company entity type.'
+  route_name:  entity.company.settings
+  parent: system.admin_structure
+
+entity.company.collection:
+  title: 'Companies'
+  description: 'List of companies.'
+  route_name: entity.company.collection
+  parent: system.admin_content

@@ -1,0 +1,22 @@
+entity.company.settings:
+  title: 'Settings'
+  route_name: entity.company.settings
+  base_route: entity.company.settings
+entity.company.view:
+  title: 'View'
+  route_name: entity.company.canonical
+  base_route: entity.company.canonical
+entity.company.edit_form:
+  title: 'Edit'
+  route_name: entity.company.edit_form
+  base_route: entity.company.canonical
+entity.company.delete_form:
+  title: 'Delete'
+  route_name: entity.company.delete_form
+  base_route: entity.company.canonical
+  weight: 10
+entity.company.collection:
+  title: 'Companies'
+  route_name: entity.company.collection
+  base_route: system.admin_content
+  weight: 10

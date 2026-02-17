@@ -1,0 +1,3 @@
+administer company:
+  title: 'Administer companies'
+  restrict access: true

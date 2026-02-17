@@ -1,0 +1,7 @@
+entity.company.settings:
+  path: 'admin/structure/company'
+  defaults:
+    _form: '\Drupal\company\Form\CompanySettingsForm'
+    _title: 'Company'
+  requirements:
+    _permission: 'administer company'
