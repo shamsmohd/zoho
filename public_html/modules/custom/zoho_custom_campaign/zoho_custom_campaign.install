@@ -1,0 +1,122 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Zoho Custom Campaign module.
+ */
+
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Create fields for Company content type to store Zoho Account data.
+ */
+function zoho_custom_campaign_update_9001()
+{
+    $field_mapper = \Drupal::service('zoho_custom_campaign.field_mapper');
+    $required_fields = $field_mapper->getRequiredFields();
+
+    $entity_type = 'node';
+    $bundle = 'company';
+
+    foreach ($required_fields as $field_name => $field_config) {
+        // Check if field storage already exists
+        $field_storage = FieldStorageConfig::loadByName($entity_type, $field_name);
+
+        if (!$field_storage) {
+            // Create field storage
+            $storage_config = [
+                'field_name' => $field_name,
+                'entity_type' => $entity_type,
+                'type' => $field_config['type'],
+                'cardinality' => $field_config['cardinality'] ?? 1,
+            ];
+
+            // Add settings if specified
+            if (isset($field_config['settings'])) {
+                $storage_config['settings'] = $field_config['settings'];
+            }
+
+            $field_storage = FieldStorageConfig::create($storage_config);
+            $field_storage->save();
+
+            \Drupal::logger('zoho_custom_campaign')->info('Created field storage: @field', [
+                '@field' => $field_name,
+            ]);
+        }
+
+        // Check if field instance already exists
+        $field = FieldConfig::loadByName($entity_type, $bundle, $field_name);
+
+        if (!$field) {
+            // Create field instance
+            $field = FieldConfig::create([
+                'field_storage' => $field_storage,
+                'bundle' => $bundle,
+                'label' => $field_config['label'],
+                'description' => $field_config['description'] ?? '',
+                'required' => $field_config['required'] ?? FALSE,
+            ]);
+            $field->save();
+
+            \Drupal::logger('zoho_custom_campaign')->info('Created field instance: @field on @bundle', [
+                '@field' => $field_name,
+                '@bundle' => $bundle,
+            ]);
+        }
+    }
+
+    // Clear caches to ensure new fields are recognized
+    \Drupal::service('cache.render')->deleteAll();
+    \Drupal::service('cache.discovery')->deleteAll();
+
+    return 'Created Zoho Account fields for Company content type.';
+}
+
+/**
+ * Change field_zoho_id from integer to string to handle large Zoho IDs.
+ */
+function zoho_custom_campaign_update_9002()
+{
+    $entity_type = 'node';
+    $bundle = 'company';
+    $field_name = 'field_zoho_id';
+
+    // Load existing field config and storage
+    $field = FieldConfig::loadByName($entity_type, $bundle, $field_name);
+    $field_storage = FieldStorageConfig::loadByName($entity_type, $field_name);
+
+    if ($field && $field_storage) {
+        // Delete field instance and storage (data will be lost but will be repopulated on next sync)
+        $field->delete();
+        $field_storage->delete();
+
+        \Drupal::logger('zoho_custom_campaign')->info('Deleted old integer field_zoho_id.');
+    }
+
+    // Recreate field storage as string
+    $new_storage = FieldStorageConfig::create([
+        'field_name' => $field_name,
+        'entity_type' => $entity_type,
+        'type' => 'string',
+        'cardinality' => 1,
+        'settings' => [
+            'max_length' => 255,
+        ],
+    ]);
+    $new_storage->save();
+
+    // Recreate field instance
+    $new_field = FieldConfig::create([
+        'field_storage' => $new_storage,
+        'bundle' => $bundle,
+        'label' => 'Zoho ID',
+        'description' => 'The unique ID from Zoho CRM',
+        'required' => FALSE,
+    ]);
+    $new_field->save();
+
+    \Drupal::logger('zoho_custom_campaign')->info('Created new string field_zoho_id.');
+
+    return 'Changed field_zoho_id to string type. Existing Zoho IDs will be repopulated on next sync.';
+}

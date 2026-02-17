@@ -18,3 +18,10 @@ zoho_custom_campaign.campaigns:
   parent: system.admin_config_services
   route_name: zoho_custom_campaign.campaigns_list
   weight: 12
+
+zoho_custom_campaign.accounts:
+  title: "Accounts"
+  description: "Manage accounts"
+  parent: system.admin_config_services
+  route_name: zoho_custom_campaign.accounts_list
+  weight: 13

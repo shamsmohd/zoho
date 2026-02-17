@@ -77,3 +77,19 @@ zoho_custom_campaign.send_campaign:
     _title: "Send Campaign"
   requirements:
     _permission: "administer site configuration"
+
+zoho_custom_campaign.accounts_list:
+  path: "/admin/config/services/zoho-custom-campaign/accounts"
+  defaults:
+    _controller: '\Drupal\zoho_custom_campaign\Controller\AccountsController::listAccounts'
+    _title: "Accounts"
+  requirements:
+    _permission: "administer site configuration"
+
+zoho_custom_campaign.create_account:
+  path: "/admin/config/services/zoho-custom-campaign/create-account"
+  defaults:
+    _form: '\Drupal\zoho_custom_campaign\Form\CreateAccountForm'
+    _title: "Create Account"
+  requirements:
+    _permission: "administer site configuration"

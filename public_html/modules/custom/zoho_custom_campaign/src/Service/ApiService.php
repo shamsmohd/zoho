@@ -6,6 +6,7 @@ use GuzzleHttp\ClientInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\zoho_custom_campaign\Service\OAuth;
 use GuzzleHttp\Exception\RequestException;
+use Drupal\node\Entity\Node;
 
 /**
  * API Service for Zoho Campaigns integration.
@@ -27,14 +28,21 @@ class ApiService
      */
     protected $oauth;
 
+    /**
+     * @var \Drupal\zoho_custom_campaign\Service\CompanyFieldMapper
+     */
+    protected $fieldMapper;
+
     public function __construct(
         ClientInterface $httpClient,
         LoggerChannelFactoryInterface $loggerFactory,
-        OAuth $oauth
+        OAuth $oauth,
+        CompanyFieldMapper $fieldMapper
     ) {
         $this->httpClient = $httpClient;
         $this->logger = $loggerFactory->get('zoho_custom_campaign');
         $this->oauth = $oauth;
+        $this->fieldMapper = $fieldMapper;
     }
 
     /**
@@ -159,7 +167,7 @@ class ApiService
             return $data['list_of_details'];
         }
 
-        return FALSE;
+        return [];
     }
 
 
@@ -464,5 +472,231 @@ class ApiService
             $this->logger->error('Failed to send campaign: @message', ['@message' => $e->getMessage()]);
             return FALSE;
         }
+    }
+
+    /**
+     * Get all accounts from Zoho CRM.
+     *
+     * @param int $page
+     *   Page number (default: 1).
+     * @param int $perPage
+     *   Records per page (default: 200, max: 200).
+     *
+     * @return array
+     *   Array of account records or empty array on failure.
+     */
+    public function getAllAccounts($page = 1, $perPage = 200)
+    {
+        if (!$this->oauth->isConnected()) {
+            $this->logger->error('Cannot get accounts: Not connected to Zoho');
+            return [];
+        }
+
+        $accessToken = $this->oauth->getAccessToken();
+        if (!$accessToken) {
+            return [];
+        }
+
+        // Get API domain from OAuth (defaults to .com if not set)
+        $apiDomain = $this->oauth->getApiDomain();
+        $url = $apiDomain . '/crm/v2/Accounts';
+
+        try {
+            $response = $this->httpClient->request('GET', $url, [
+                'query' => [
+                    'page' => $page,
+                    'per_page' => min($perPage, 200), // Max 200 per page
+                ],
+                'headers' => [
+                    'Authorization' => 'Zoho-oauthtoken ' . $accessToken,
+                ],
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            // Check for API errors
+            if (isset($data['code']) && $data['code'] !== 'SUCCESS') {
+                $this->logger->error('Zoho CRM API error: @message', [
+                    '@message' => $data['message'] ?? 'Unknown error'
+                ]);
+                return [];
+            }
+
+            // Return accounts data
+            if (isset($data['data']) && is_array($data['data'])) {
+                $this->logger->info('Successfully fetched @count accounts from Zoho CRM', [
+                    '@count' => count($data['data'])
+                ]);
+                return $data['data'];
+            }
+
+            return [];
+        } catch (RequestException $e) {
+            $errorBody = '';
+            if ($e->hasResponse()) {
+                $errorBody = $e->getResponse()->getBody()->getContents();
+            }
+            $this->logger->error('Zoho CRM API request failed: @message | Response: @body', [
+                '@message' => $e->getMessage(),
+                '@body' => $errorBody,
+            ]);
+            return [];
+        }
+    }
+    public function buildTable($accounts)
+    {
+        $header = [
+            'Account Name',
+            'Phone',
+            'Website',
+            'Annual Revenue',
+            'Industry',
+        ];
+
+        $rows = [];
+        foreach ($accounts as $account) {
+            $accountName = $account['Account_Name'] ?? 'N/A';
+            $phone = $account['Phone'] ?? 'N/A';
+            $website = $account['Website'] ?? 'N/A';
+            $annualRevenue = $account['Annual_Revenue'] ?? 'N/A';
+            $industry = $account['Industry'] ?? 'N/A';
+
+            // Format annual revenue if it's a number
+            if (is_numeric($annualRevenue)) {
+                $annualRevenue = '$' . number_format($annualRevenue, 2);
+            }
+
+            // Make website clickable if it exists
+            if ($website !== 'N/A' && !empty($website)) {
+                $website = [
+                    'data' => [
+                        '#type' => 'link',
+                        '#title' => $website,
+                        '#url' => \Drupal\Core\Url::fromUri($website),
+                        '#attributes' => ['target' => '_blank'],
+                    ],
+                ];
+            }
+
+            $rows[] = [
+                $accountName,
+                $phone,
+                $website,
+                $annualRevenue,
+                $industry,
+            ];
+        }
+
+        return [
+            '#type' => 'table',
+            '#header' => $header,
+            '#rows' => $rows,
+            '#empty' => 'No accounts found.',
+            '#caption' => 'Total accounts: ' . count($accounts),
+        ];
+    }
+    public function syncCompanies($accounts)
+    {
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        $errors = 0;
+
+        foreach ($accounts as $account) {
+            try {
+                // Get account name and Zoho ID
+                $accountName = $account['Account_Name'] ?? null;
+                $zohoId = $account['id'] ?? null;
+
+                // Skip if no name
+                if (empty($accountName)) {
+                    $this->logger->warning('Skipping account with no name');
+                    $skipped++;
+                    continue;
+                }
+
+                // Map Zoho account data to node fields using field mapper
+                $nodeData = $this->fieldMapper->mapAccountToNode($account);
+
+                // Try to find existing node by Zoho ID first (more reliable)
+                $existingNode = null;
+                if ($zohoId) {
+                    $query = \Drupal::entityQuery('node')
+                        ->condition('type', 'company')
+                        ->condition('field_zoho_id', $zohoId)
+                        ->accessCheck(FALSE)
+                        ->range(0, 1);
+                    $nids = $query->execute();
+
+                    if (!empty($nids)) {
+                        $nid = reset($nids);
+                        $existingNode = Node::load($nid);
+                    }
+                }
+
+                // If not found by Zoho ID, try by title
+                if (!$existingNode) {
+                    $query = \Drupal::entityQuery('node')
+                        ->condition('type', 'company')
+                        ->condition('title', $accountName)
+                        ->accessCheck(FALSE)
+                        ->range(0, 1);
+                    $nids = $query->execute();
+
+                    if (!empty($nids)) {
+                        $nid = reset($nids);
+                        $existingNode = Node::load($nid);
+                    }
+                }
+
+                if ($existingNode) {
+                    // Update existing node
+                    foreach ($nodeData as $fieldName => $value) {
+                        // Skip type and uid fields
+                        if (in_array($fieldName, ['type', 'uid'])) {
+                            continue;
+                        }
+                        $existingNode->set($fieldName, $value);
+                    }
+                    $existingNode->save();
+                    $updated++;
+
+                    $this->logger->info('Updated company: @name (Zoho ID: @id)', [
+                        '@name' => $accountName,
+                        '@id' => $zohoId ?? 'N/A',
+                    ]);
+                } else {
+                    // Create new node
+                    $node = Node::create($nodeData);
+                    $node->save();
+                    $created++;
+
+                    $this->logger->info('Created company: @name (Zoho ID: @id)', [
+                        '@name' => $accountName,
+                        '@id' => $zohoId ?? 'N/A',
+                    ]);
+                }
+            } catch (\Exception $e) {
+                $errors++;
+                $this->logger->error('Failed to sync company @name: @error', [
+                    '@name' => $account['Account_Name'] ?? 'Unknown',
+                    '@error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        $this->logger->info('Sync complete. Created: @created, Updated: @updated, Skipped: @skipped, Errors: @errors', [
+            '@created' => $created,
+            '@updated' => $updated,
+            '@skipped' => $skipped,
+            '@errors' => $errors,
+        ]);
+
+        return [
+            'created' => $created,
+            'updated' => $updated,
+            'skipped' => $skipped,
+            'errors' => $errors,
+        ];
     }
 }

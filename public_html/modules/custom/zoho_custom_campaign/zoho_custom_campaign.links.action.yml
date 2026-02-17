@@ -9,3 +9,9 @@ zoho_custom_campaign.create_campaign_action:
   title: "Create campaign"
   appears_on:
     - zoho_custom_campaign.campaigns_list
+
+zoho_custom_campaign.create_account_action:
+  route_name: zoho_custom_campaign.create_account
+  title: "Create account"
+  appears_on:
+    - zoho_custom_campaign.accounts_list

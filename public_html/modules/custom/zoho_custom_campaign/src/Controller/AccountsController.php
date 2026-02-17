@@ -3,12 +3,13 @@
 namespace Drupal\zoho_custom_campaign\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\zoho_custom_campaign\Service\ApiService;
 use Drupal\zoho_custom_campaign\Service\OAuth;
 
 /**
- * Controller for displaying Zoho Campaigns contacts.
+ * Controller for displaying Zoho CRM accounts.
  */
 class AccountsController extends ControllerBase
 {
@@ -37,15 +38,15 @@ class AccountsController extends ControllerBase
     }
 
     /**
-     * Display all accounts from Zoho Campaigns.
+     * Display all accounts from Zoho CRM.
      */
     public function listAccounts()
     {
-        \Drupal::logger('zoho_custom_crm')->notice('Zoho callback reached.');
+        \Drupal::logger('zoho_custom_campaign')->notice('Zoho CRM accounts page accessed.');
 
         // Check if connected to Zoho
         if (!$this->oauth->isConnected()) {
-            \Drupal::messenger()->addError($this->t('Not connected to Zoho Campaigns. Please <a href="@url">configure the connection</a> first.', [
+            \Drupal::messenger()->addError($this->t('Not connected to Zoho. Please <a href="@url">configure the connection</a> first.', [
                 '@url' => \Drupal\Core\Url::fromRoute('zoho_custom_campaign.data_page')->toString(),
             ]));
 
@@ -54,66 +55,27 @@ class AccountsController extends ControllerBase
             ];
         }
 
-        // Fetch all contacts
-        $contacts = $this->apiService->getAllAccounts();
+        // Fetch all accounts from Zoho CRM
+        $accounts = $this->apiService->getAllAccounts();
 
-        if ($contacts === false) {
-            \Drupal::messenger()->addError($this->t('Failed to fetch contacts from Zoho Campaigns. Check the logs for details.'));
+        if ($accounts === false || $accounts === null) {
+            \Drupal::messenger()->addError($this->t('Failed to fetch accounts from Zoho CRM. Check the logs for details.'));
             return [
                 '#markup' => '',
             ];
         }
 
-        if (empty($contacts)) {
-            \Drupal::messenger()->addWarning($this->t('No contacts found in your Zoho Campaigns account.'));
+        if (empty($accounts)) {
+            \Drupal::messenger()->addWarning($this->t('No accounts found in your Zoho CRM.'));
             return [
                 '#markup' => '',
             ];
         }
 
         // Build table
-        $header = [
-            $this->t('Email'),
-            $this->t('Contact Name'),
-            $this->t('Phone Number'),
-            $this->t('List Name'),
-            $this->t('Actions'),
-        ];
+        $table = $this->apiService->buildTable($accounts);
 
-        $rows = [];
-        foreach ($contacts as $contact) {
-            $email = $contact['Contact Email'] ?? $contact['contact_email'] ?? 'N/A';
-            $firstName = $contact['First Name'] ?? $contact['firstname'] ?? '';
-            $lastName = $contact['Last Name'] ?? $contact['lastname'] ?? '';
-            $contactName = trim($firstName . ' ' . $lastName) ?: 'N/A';
-            $listName = $contact['list_name'] ?? 'N/A';
-            $phone = $contact['Phone'] ?? $contact['phone'] ?? 'N/A';
-            // $status = $contact['Contact Status'] ?? $contact['status'] ?? 'N/A';
-
-            $detailsLink = \Drupal\Core\Link::createFromRoute(
-                $this->t('Details'),
-                'zoho_custom_campaign.contact_details',
-                [
-                    'list_key' => $contact['list_key'],
-                    'email' => $email,
-                ]
-            );
-
-            $rows[] = [
-                $email,
-                $contactName,
-                $phone,
-                $listName,
-                $detailsLink,
-            ];
-        }
-
-        return [
-            '#type' => 'table',
-            '#header' => $header,
-            '#rows' => $rows,
-            '#empty' => $this->t('No contacts found.'),
-            '#caption' => $this->t('Total contacts: @count', ['@count' => count($contacts)]),
-        ];
+        $this->apiService->syncCompanies($accounts);
+        return $table;
     }
 }

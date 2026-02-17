@@ -2,8 +2,17 @@ services:
   zoho_custom_campaign.api_service:
     class: Drupal\zoho_custom_campaign\Service\ApiService
     arguments:
-      ["@http_client", "@logger.factory", "@zoho_custom_campaign.oauth"]
+      [
+        "@http_client",
+        "@logger.factory",
+        "@zoho_custom_campaign.oauth",
+        "@zoho_custom_campaign.field_mapper",
+      ]
 
   zoho_custom_campaign.oauth:
     class: Drupal\zoho_custom_campaign\Service\OAuth
     arguments: ["@http_client", "@config.factory", "@logger.factory", "@state"]
+
+  zoho_custom_campaign.field_mapper:
+    class: Drupal\zoho_custom_campaign\Service\CompanyFieldMapper
+    arguments: ["@logger.factory"]

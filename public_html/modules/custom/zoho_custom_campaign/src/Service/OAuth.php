@@ -57,7 +57,7 @@ class OAuth
     {
         $clientId = $this->config->get('client_id');
         $redirectUri = $this->config->get('redirect_uri');
-        $scope = 'ZohoCampaigns.contact.UPDATE,ZohoCampaigns.contact.READ,ZohoCampaigns.campaign.ALL'; // Contact and Campaign scopes
+        $scope = 'ZohoCampaigns.contact.UPDATE,ZohoCampaigns.contact.READ,ZohoCampaigns.campaign.ALL,ZohoCRM.modules.ALL'; // Contact and Campaign scopes
 
         if (!$clientId || !$redirectUri) {
             return '';
